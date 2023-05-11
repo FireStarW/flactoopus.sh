@@ -30,6 +30,14 @@ if [[ "$albumname" == *"$flacprefix"* ]];then
   albumname=${albumname%??}
   echo "$albumname"
 fi
+sixteenprefix='[16B'
+#remove [16B-
+if [[ "$albumname" == *"$sixteenprefix"* ]];then
+  echo "16B Suffix is there."
+  albumname=${albumname/16B*/}
+  albumname=${albumname%??}
+  echo "$albumname"
+fi
 #remove later
 if [[ "$artistname" == ".lAteR" ]]; then
 foldername=$albumname
