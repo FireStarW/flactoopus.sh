@@ -1,11 +1,25 @@
 #!/bin/bash
 
-if [ "$1" == "" ];then
-#no argument
-var="cover.jpg"
-	elif [ "$1" != "" ];then
-		var=$1
+extractArt=false
+
+if [ "$1" != "" ];then
+# fed in argument
+var=$1
+	elif [ "$1" == "" ];then
+      if [ -e "cover.jpg" ]
+      then
+        var="cover.jpg"
+      elif [ -e "folder.jpg" ]
+      then
+        var="folder.jpg"
+      else
+        echo "No art found, will extract"
+        var="cover.jpg"
+        extractArt=true
+      fi
+
 fi
+
 
 echo "================"
 echo "Using $var"
@@ -15,6 +29,16 @@ dir=$(pwd)
 parentname="$(dirname "$dir")"
 artistname=$(basename "$parentname")
 albumname=$(basename "$PWD")
+
+#messy way of getting one of the flac's filename
+for a in ./*.flac; do
+  filenameOne=$a
+done
+
+if $extractArt;then
+  echo "extracting album art"
+  kid3-cli -c 'get picture:cover.jpg' "$filenameOne"
+fi
 
 #only downscale if res bigger than 800
 convert $var  -resize 800x800\>  resize_cover.jpg
@@ -44,7 +68,7 @@ foldername=$albumname
   echo "later prefix is there."
 else
 foldername="$artistname - $albumname"
-fi 
+fi
 
 echo "foldername:"
 echo "$foldername"
@@ -56,6 +80,11 @@ for a in ./*.flac; do
 done
 
 wait
+
+if $extractArt;then
+  rm cover.jpg
+fi
+
 mv *.opus "$foldername"
 mv resize_cover.jpg "$foldername"
 cd "$foldername"
